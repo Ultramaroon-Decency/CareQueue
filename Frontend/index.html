@@ -12,6 +12,12 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
+  <!-- CareQueue CSS -->
+  <link rel="stylesheet" href="css/carequeue.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -1176,6 +1182,7 @@
       <li><a href="#home">Home</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#carequeue">CareQueue</a></li>
       <li><a href="#faq">FAQ</a></li>
       <li><a href="#" onclick="openLoginPopup(); return false;">Official Login</a></li>
       <li><a href="#search-panel">Map</a></li>
@@ -1206,9 +1213,8 @@
   <!-- Hero -->
   <section class="hero" id="home">
     <canvas id="threejs-hero-canvas"></canvas>
-    <h2>Real-Time Hospital Bed Availability</h2>
-    <p>Find available beds in General, ICU, Emergency, and Operation wards instantly. Your healthcare decisions
-      simplified.</p>
+    <h2>Real-Time Hospital Bed & Queue Optimization</h2>
+    <p>Find available beds, check live queue wait times, and get AI-powered scheduling recommendations. Your healthcare decisions simplified.</p>
     <!-- Scroll Indicator -->
     <a href="#features" class="scroll-indicator">
       <span>Scroll to explore</span>
@@ -1251,6 +1257,11 @@
           <h3 class="feature-title">Blood Bank Locator</h3>
           <p class="feature-desc">Find nearest blood banks and check available blood groups instantly.</p>
         </div>
+        <div class="feature-card">
+          <img src="https://cdn-icons-png.flaticon.com/512/4228/4228704.png" class="feature-icon" alt="queue" />
+          <h3 class="feature-title">CareQueue AI</h3>
+          <p class="feature-desc">AI-powered queue optimization with wait-time predictions and smart scheduling.</p>
+        </div>
         <!-- Duplicate cards for seamless marquee loop -->
         <div class="feature-card">
           <img src="https://cdn-icons-png.flaticon.com/512/2966/2966327.png" class="feature-icon" alt="real-time" />
@@ -1276,6 +1287,11 @@
           <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png" class="feature-icon" alt="blood-bank" />
           <h3 class="feature-title">Blood Bank Locator</h3>
           <p class="feature-desc">Find nearest blood banks and check available blood groups instantly.</p>
+        </div>
+        <div class="feature-card">
+          <img src="https://cdn-icons-png.flaticon.com/512/4228/4228704.png" class="feature-icon" alt="queue" />
+          <h3 class="feature-title">CareQueue AI</h3>
+          <p class="feature-desc">AI-powered queue optimization with wait-time predictions and smart scheduling.</p>
         </div>
       </div>
     </div>
@@ -1351,6 +1367,116 @@
         </tr>
       </tbody>
     </table>
+  </section>
+
+  <!-- ═══════════════ CAREQUEUE SECTION ═══════════════ -->
+  <section class="carequeue-section" id="carequeue">
+    <div class="cq-header">
+      <div class="cq-badge">AI-Powered</div>
+      <h2 class="section-title">CareQueue — Smart Queue Optimization</h2>
+      <p class="cq-subtitle">Real-time queue monitoring, AI-driven scheduling recommendations, and predicted wait-time analytics across all hospitals.</p>
+    </div>
+
+    <!-- Stat Overview Cards -->
+    <div class="cq-stats-grid">
+      <div class="cq-stat-card">
+        <span class="cq-stat-icon">👥</span>
+        <div class="cq-stat-value" id="cq-total-patients">0</div>
+        <div class="cq-stat-label">Patients in Queues</div>
+        <div class="cq-stat-trend positive">↗ Live</div>
+      </div>
+      <div class="cq-stat-card">
+        <span class="cq-stat-icon">⏱️</span>
+        <div class="cq-stat-value" id="cq-avg-wait">0 min</div>
+        <div class="cq-stat-label">Avg Wait Time</div>
+        <div class="cq-stat-trend negative">↘ Optimizing</div>
+      </div>
+      <div class="cq-stat-card">
+        <span class="cq-stat-icon">🏥</span>
+        <div class="cq-stat-value" id="cq-busy-hospitals">0</div>
+        <div class="cq-stat-label">Hospitals at Capacity</div>
+        <div class="cq-stat-trend negative">↗ Monitoring</div>
+      </div>
+      <div class="cq-stat-card">
+        <span class="cq-stat-icon">✅</span>
+        <div class="cq-stat-value" id="cq-optimized-rate">0%</div>
+        <div class="cq-stat-label">Scheduling Efficiency</div>
+        <div class="cq-stat-trend positive">↗ Improving</div>
+      </div>
+    </div>
+
+    <!-- Live Queue + Charts -->
+    <div class="cq-content-grid">
+      <!-- Live Queue Status -->
+      <div class="cq-panel">
+        <div class="cq-panel-header">
+          <div class="cq-panel-title"><span class="cq-live-dot"></span> Live Queue Status</div>
+          <span class="cq-refresh-badge">Updates every 30s</span>
+        </div>
+        <div class="cq-queue-list" id="cq-queue-list">
+          <!-- Populated by carequeue.js -->
+        </div>
+      </div>
+
+      <!-- Wait Time Trend Chart -->
+      <div class="cq-panel">
+        <div class="cq-chart-title">📈 Wait Time Trends (24hr)</div>
+        <div class="cq-chart-container">
+          <canvas id="cq-wait-trend-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart Scheduling Optimizer -->
+    <div class="cq-optimizer">
+      <div class="cq-panel">
+        <div class="cq-panel-header">
+          <div class="cq-panel-title">🧠 Smart Scheduling Optimizer</div>
+        </div>
+        <div class="cq-optimizer-inner">
+          <div class="cq-optimizer-controls">
+            <div class="cq-optimizer-field">
+              <label for="cq-ward-select">Ward Type</label>
+              <select id="cq-ward-select">
+                <option value="General">General</option>
+                <option value="ICU">ICU</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Operation">Operation</option>
+              </select>
+            </div>
+            <div class="cq-optimizer-field">
+              <label for="cq-urgency-select">Urgency Level</label>
+              <select id="cq-urgency-select">
+                <option value="normal">Normal</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <button class="cq-optimize-btn" id="cq-optimize-btn">
+              ⚡ Find Best Option
+            </button>
+          </div>
+          <div class="cq-recommendations" id="cq-recommendations">
+            <!-- Populated by carequeue.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peak Hours Heatmap -->
+    <div class="cq-charts-grid">
+      <div class="cq-chart-panel">
+        <div class="cq-chart-title">🔥 Peak Hours Heatmap (6AM–5PM)</div>
+        <div class="cq-heatmap" id="cq-heatmap">
+          <!-- Populated by carequeue.js -->
+        </div>
+      </div>
+      <div class="cq-chart-panel">
+        <div class="cq-chart-title">📊 Queue Load Distribution</div>
+        <div class="cq-chart-container">
+          <canvas id="cq-load-chart"></canvas>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- FAQ -->
@@ -1961,7 +2087,16 @@
         "medical",
         "doctor",
         "patient",
-        "ward"
+        "ward",
+        "queue",
+        "wait",
+        "waiting",
+        "schedule",
+        "appointment",
+        "crowded",
+        "busy",
+        "optimal",
+        "best time"
       ];
 
       const ALLOWED_SMALL_TALK = [
@@ -2079,6 +2214,17 @@
         }
 
         /* ===============================
+           CAREQUEUE HANDLER
+           =============================== */
+        if (typeof window.handleQueueChatQuery === 'function') {
+          const queueReply = window.handleQueueChatQuery(rawInput);
+          if (queueReply) {
+            addMessage(queueReply, 'bot');
+            return;
+          }
+        }
+
+        /* ===============================
            AI FALLBACK (SMART & FLEXIBLE)
            =============================== */
 
@@ -2110,6 +2256,8 @@
 
       window.sendMessage = sendMessage;
       window.toggleChatbot = toggleChatbot;
+      window.hospitals = hospitals;
+      window.bloodBanks = bloodBanks;
 
     </script>
 
@@ -2704,7 +2852,7 @@
         const featuresWrapper = document.querySelector('.features-marquee-wrapper');
         const prevBtn = document.getElementById('feature-prev');
         const nextBtn = document.getElementById('feature-next');
-        const uniqueCards = 5; // Only count original cards, not duplicates
+        const uniqueCards = 6; // Only count original cards, not duplicates
 
         if (!featuresGrid || !prevBtn || !nextBtn || !featuresWrapper) return;
 
@@ -2910,6 +3058,85 @@
 
         // Listen for scroll
         window.addEventListener('scroll', handleScroll, { passive: true });
+      })();
+    </script>
+
+    <!-- CareQueue Engine -->
+    <script src="js/carequeue.js"></script>
+
+    <!-- CareQueue Load Distribution Chart -->
+    <script>
+      (function() {
+        function renderLoadChart() {
+          const ctx = document.getElementById('cq-load-chart');
+          if (!ctx || typeof Chart === 'undefined' || typeof hospitals === 'undefined') return;
+
+          const wardTypes = ['General', 'ICU', 'Emergency', 'Operation'];
+          const colors = ['#4F46E5', '#06B6D4', '#F59E0B', '#EF4444'];
+          const bgColors = ['rgba(79,70,229,0.7)', 'rgba(6,182,212,0.7)', 'rgba(245,158,11,0.7)', 'rgba(239,68,68,0.7)'];
+
+          const labels = hospitals.map(h => {
+            return h.name.length > 12 ? h.name.substring(0, 12) + '…' : h.name;
+          });
+
+          const datasets = wardTypes.map((ward, i) => ({
+            label: ward,
+            data: hospitals.map(h => h.wards[ward] || 0),
+            backgroundColor: bgColors[i],
+            borderColor: colors[i],
+            borderWidth: 1,
+            borderRadius: 4
+          }));
+
+          new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 15,
+                    font: { family: "'Inter', sans-serif", size: 11 }
+                  }
+                },
+                tooltip: {
+                  backgroundColor: '#1E293B',
+                  cornerRadius: 8,
+                  padding: 10,
+                  titleFont: { family: "'Inter', sans-serif" },
+                  bodyFont: { family: "'Inter', sans-serif" }
+                }
+              },
+              scales: {
+                x: {
+                  stacked: true,
+                  grid: { display: false },
+                  ticks: { font: { family: "'Inter', sans-serif", size: 10 } }
+                },
+                y: {
+                  stacked: true,
+                  beginAtZero: true,
+                  grid: { color: 'rgba(0,0,0,0.04)' },
+                  ticks: {
+                    font: { family: "'Inter', sans-serif", size: 11 },
+                    callback: v => v + ' beds'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => setTimeout(renderLoadChart, 300));
+        } else {
+          setTimeout(renderLoadChart, 300);
+        }
       })();
     </script>
 
